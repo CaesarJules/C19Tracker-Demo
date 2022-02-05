@@ -165,12 +165,16 @@ with st.spinner('Fetching results ....'):
     fig2.update_layout(
         overwrite = True,
         width=1100,
-        height=600
+        height=600,
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False)
     )
     fig3.update_layout(
         overwrite = True,
         width=1100,
-        height=600
+        height=600,
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False)
     )
 
     if graph_type=='new_cases':
