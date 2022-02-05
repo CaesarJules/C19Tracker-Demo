@@ -39,8 +39,8 @@ st.title("COVID19 Statistics")
 expander_bar = st.expander("About")
 expander_bar.markdown("""
 #### This is a COVID-19 statistics Dashboard Based on public data by Johns Hopkins CSSE.
-* **EDA and App Development Details:** [CoinMarketCap](http://coinmarketcap.com).
-* **API Credits:** [CoinMarketCap](http://coinmarketcap.com).
+* **EDA and App Development Details:** [Github](https://github.com/CaesarJules/Streamlit-Apps/tree/main/C19Tracker).
+* **API Credits:** [COVID-19 Statistics](https://rapidapi.com/axisbits-axisbits-default/api/covid-19-statistics/details).
 * **Python libraries used:** streamlit, pandas, numpy, requests, plotly, time, os, matplotlib, collections, datetime, IPython.
 """)
 #Initialize the starting date in our data
