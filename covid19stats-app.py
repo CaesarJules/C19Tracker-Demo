@@ -101,7 +101,7 @@ def load_cache(host):
         if connection.is_connected():
             cursor.close()
             connection.close()
-            print("MySQL connection is closed")
+            print("Cache successfully loaded from MySQL DB")
 
 cached_data = load_cache(host="c19dbcache.mysql.database.azure.com")
 cached_data = cache_data(cached_data, latest_cache_date, regions, df_regions, cache_ID)
@@ -304,5 +304,10 @@ with st.spinner('Fetching results ....'):
         if graph_type!='new_cases':
             st.markdown(fig3_title, unsafe_allow_html=True)
             st.plotly_chart(fig3)
-    
 
+hide_streamlit_style = """
+            <style>
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
