@@ -16,6 +16,7 @@ from IPython.display import Markdown as md
 from pytz import timezone
 from copy import deepcopy
 from streamlit.script_runner import RerunException, StopException
+import mysql.connector
 from functions import *
 
 #Get the current file's directory
@@ -67,36 +68,45 @@ regions = list(df_regions.name)
 #Clean the list of regions
 regions = [x for x in regions if x not in ['Others','Cruise Ship']]
 iso = [df_regions.loc[df_regions.name==rgn, 'iso'].values[0] for rgn in regions]
-
-def load_cache(filepath=filepath):
-    #Check first if there is a cached file and if it can be accessed
-    if os.path.isfile(filepath) and os.access(filepath, os.R_OK):
-        with open(filepath, 'rb') as fp:
-            return pickle5.load(fp)
-    else:
-        return {}
-
-cached_data = load_cache()
-
+#Initialize the cache ID in the database
+cache_ID = None
 #Use the first date in the data to cache all data
 latest_cache_date = initial_date
 data = dict()
 
-if len(cached_data)>0:
-    #Get the latest cache date
-    data = dict(cached_data)
-    temp = data['dates'][-1]
-    latest_cache_date = datetime.datetime.strptime(temp, '%Y-%m-%d')
-    #Update the initial date to the first date in our cached data
-    initial_date = data['dates'][0]
-    initial_date = datetime.datetime.strptime(initial_date, '%Y-%m-%d')
-    dates = get_dates_till_today(initial_date)
-    #Update cached data 
-    with st.spinner('Fetching results ....'):
-        data = cache_data(data, latest_cache_date, regions, df_regions)
-        
-else:
-    print("Error, No cache found!!!")
+def load_pickle(blb):
+    result = pickle5.loads(blb)
+    if len(result)>0:
+        return result
+    else:
+        return {}
+@st.cache(show_spinner=False, allow_output_mutation=True)
+def load_cache(host):
+    #Load the cached file from a Database
+    try:
+        connection = connect_to_db(host)
+        cursor = connection.cursor()
+        sql = """SELECT * FROM cachedb;"""
+        cursor.execute(sql)
+        record = cursor.fetchall()
+        for row in record:
+            cache_ID = row[0]
+            latest_cache_date = row[2]
+            return load_pickle(row[1])
+
+    except mysql.connector.Error as error:
+        print("Failed to read BLOB data from MySQL table {}".format(error))
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+
+cached_data = load_cache(host="c19dbcache.mysql.database.azure.com")
+cached_data = cache_data(cached_data, latest_cache_date, regions, df_regions, cache_ID)
+
+data = dict(cached_data)
 
 with st.spinner('Fetching results ....'):
     #Create and populate the sidebar
@@ -281,7 +291,7 @@ with st.spinner('Fetching results ....'):
             )
             fig3_title = f"""<h4>Number of COVID-19 <i>daily difference</i> {graph_type} cases worldwide since {datetime.datetime.strptime(data['dates'][0], "%Y-%m-%d").strftime('%A %B %d, %Y')}</h4>"""
 
-    if len(countries_selected)<=0:
+    if len(countries_selected)==0:
         st.plotly_chart(fig)
         st.markdown(fig2_title, unsafe_allow_html=True)
         st.plotly_chart(fig2)
@@ -294,4 +304,5 @@ with st.spinner('Fetching results ....'):
         if graph_type!='new_cases':
             st.markdown(fig3_title, unsafe_allow_html=True)
             st.plotly_chart(fig3)
+    
 

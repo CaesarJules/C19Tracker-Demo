@@ -15,14 +15,28 @@ import warnings
 from IPython.display import Markdown as md
 from pytz import timezone
 from copy import deepcopy
+import mysql.connector
 
 #Get the current file's directory
 path = os.path.dirname(__file__)
 #Create cache's filepath
 filepath = os.path.join(path, 'data/cache_final.p')
+#Create Database SSL certificate filepath
+certpath = os.path.join(path, 'cert/DigiCertGlobalRootCA.crt.pem')
+
+def connect_to_db(host):
+  conn = mysql.connector.connect(user="jniyon", 
+                            password="Hawking18wong$", 
+                            host=host, 
+                            port=3306, 
+                            database="c19db", 
+                            ssl_ca=certpath,
+                            ssl_disabled=False)
+  return conn
 
 def get_dates_till_today(start_date):
-  return pd.date_range(end=datetime.datetime.today(), start=start_date).strftime('%Y-%m-%d').tolist()
+  time1 = datetime.datetime.strptime(datetime.datetime.now(timezone('Canada/Eastern')).strftime('%Y-%m-%d'), '%Y-%m-%d')
+  return pd.date_range(end=time1, start=start_date).strftime('%Y-%m-%d').tolist()
 
 def get_region_report(region_name, date, df):
   url = "https://covid-19-statistics.p.rapidapi.com"
@@ -138,20 +152,41 @@ def update_cached_data(data, new_data, regions):
 
   return old_data.copy()
 
-def cache_data(data, latest_date, regions, df_regions):
-    time1 = datetime.datetime.strptime(datetime.datetime.now(timezone('Canada/Eastern')).strftime('%Y-%m-%d'), '%Y-%m-%d')
-    if time1 > (latest_date + datetime.timedelta(days=1)):
-        new_dates = get_dates_till_today(latest_date)
-        #Remove today's date from the dates to be cached
-        new_dates.pop(-1)
-        if len(new_dates)>0:
-            new_data = get_countries_data(new_dates, regions, df_regions)
-            #Update the data
+def update_data_ondb(data, latest_date, cache_ID):
+  try:
+    connection = connect_to_db("c19dbcache.mysql.database.azure.com")
+    cursor = connection.cursor()
+    #Get the binary object
+    cache_binary = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+    #SQL statements
+    #insert_cache_query = """INSERT INTO cachedb(cached_data, last_date) VALUES (%s, %s);"""
+    update_cache_query = """UPDATE cachedb SET cached_data=%s, last_date=%s WHERE id=%s;"""
 
-            temp = update_cached_data(data, new_data, regions)
-            data = get_optimized_regions_data(temp, regions)
-            #Cache the new data
-            with open(filepath, 'wb') as fp:
-                pickle.dump(data, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    cursor.execute(update_cache_query, (cache_binary, latest_date, cache_ID))
+    connection.commit()
+    print("Successfully cached data!")
+
+  except mysql.connector.Error as error:
+    print("Failed inserting cache into MySQL table {}".format(error))
+
+  finally:
+    if connection.is_connected():
+      cursor.close()
+      connection.close()
+      print("MySQL connection is closed")
+
+def cache_data(data, latest_date, regions, df_regions, cacheID):
+  time1 = datetime.datetime.strptime(datetime.datetime.now(timezone('Canada/Eastern')).strftime('%Y-%m-%d'), '%Y-%m-%d')
+  if time1 > (latest_date + datetime.timedelta(days=1)):
+    new_dates = get_dates_till_today(latest_date)
+    #Remove today's date from the dates to be cached
+    new_dates.pop(-1)
+    if len(new_dates)>0:
+      new_data = get_countries_data(new_dates, regions, df_regions)
+      #Update the data
+      temp = update_cached_data(data, new_data, regions)
+      data = get_optimized_regions_data(temp, regions)
+      #Cache the new data to the Database
+      update_data_ondb(data, new_dates[-1], cacheID)
     
-    return data
+  return data
