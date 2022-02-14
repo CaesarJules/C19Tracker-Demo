@@ -21,8 +21,6 @@ from functions import *
 
 #Get the current file's directory
 path = os.path.dirname(__file__)
-#Create cache's filepath
-filepath = os.path.join(path, 'data/cache_final.p')
 #Create logo filepath
 logo = os.path.join(path, 'data/logo.png')
 
@@ -45,7 +43,7 @@ expander_bar.markdown("""
 * **Python libraries used:** streamlit, pandas, numpy, requests, plotly, time, os, matplotlib, collections, datetime, IPython.
 """)
 #Initialize the starting date in our data
-initial_date = datetime.datetime.today()
+initial_date = datetime.datetime.strptime(datetime.datetime.now(timezone('Canada/Eastern')).strftime('%Y-%m-%d'), '%Y-%m-%d')
 dates = get_dates_till_today(initial_date)
 
 @st.cache(show_spinner=False)
@@ -80,7 +78,7 @@ def load_pickle(blb):
         return result
     else:
         return {}
-@st.cache(show_spinner=False, allow_output_mutation=True)
+
 def load_cache(host):
     #Load the cached file from a Database
     try:
