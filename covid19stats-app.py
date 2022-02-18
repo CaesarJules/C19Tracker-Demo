@@ -70,7 +70,6 @@ iso = [df_regions.loc[df_regions.name==rgn, 'iso'].values[0] for rgn in regions]
 cache_ID = None
 #Use the first date in the data to cache all data
 latest_cache_date = initial_date
-data = dict()
 
 def load_pickle(blb):
     result = pickle5.loads(blb)
@@ -90,7 +89,7 @@ def load_cache(host):
         for row in record:
             cache_ID = row[0]
             latest_cache_date = row[2]
-            return load_pickle(row[1])
+            return cache_ID, load_pickle(row[1]), latest_cache_date
 
     except mysql.connector.Error as error:
         print("Failed to read BLOB data from MySQL table {}".format(error))
@@ -101,10 +100,9 @@ def load_cache(host):
             connection.close()
             print("Cache successfully loaded from MySQL DB")
 
-cached_data = load_cache(host="c19dbcache.mysql.database.azure.com")
-cached_data = cache_data(cached_data, latest_cache_date, regions, df_regions, cache_ID)
+cache_ID, cached_data, latest_cache_date = load_cache(host="c19dbcache.mysql.database.azure.com")
 
-data = dict(cached_data)
+data = dict(cache_data(cached_data, latest_cache_date, regions, df_regions, cache_ID))
 
 with st.spinner('Fetching results ....'):
     #Create and populate the sidebar
