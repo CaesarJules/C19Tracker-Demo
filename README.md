@@ -15,7 +15,7 @@ For instance, it allows comparing statistics about `confirmed cases`, `death cas
 ![Demo](./data/plots/demo_countries.png "Demo")
 > **_NOTE:_**  All plots are extendable, and downloadable.
 # Development
-- This web application uses public data published Johns Hopkins CSSE, and it uses Johns Hopkins CSSE's [**RapidAPI**](https://rapidapi.com/axisbits-axisbits-default/api/covid-19-statistics/details) to collect all the data. Meanwhile, for optimization purposes, the application uses the best `caching` practices by storing historical data on a `MySQL` database hosted on `Microsoft Azure`, as well as `Streamlit's` session caching upon usage. Finally, this application synchronuously updates the cached data with the Johns Hopkins CSSE's API.
+- This web application uses public data published by Johns Hopkins CSSE, and uses its [**RapidAPI**](https://rapidapi.com/axisbits-axisbits-default/api/covid-19-statistics/details) to collect all the data. <br /> Meanwhile, for optimization purposes, this application uses the best `caching` practices by storing historical data on a `MySQL` database hosted on `Microsoft Azure`, as well as `Streamlit's` session caching upon usage. <br /> Finally, this application synchronuously updates the cached data with the Johns Hopkins CSSE's API on a daily basis.
 # Contribute
 For any suggestion or feedback, please feel free to reach out to me via [email](mailto:njucesar@gmail.com).
 # License
