@@ -180,7 +180,7 @@ def update_data_ondb(data, latest_date, cache_ID):
 def cache_data(data, latest_date, regions, df_regions, cacheID):
   curr_time =datetime.datetime.now(timezone('Canada/Eastern'))
   time1 = datetime.datetime.strptime(curr_time.strftime('%Y-%m-%d'), '%Y-%m-%d')
-  right_time = datetime.time(9,00) <= curr_time.time() <= datetime.time(10,30)
+  right_time = datetime.time(5,00) <= curr_time.time() <= datetime.time(6,00)
   if time1.date() > (latest_date + datetime.timedelta(days=1)) and right_time:
     new_dates = get_dates_till_today(latest_date)
     #Remove today's date from the dates to be cached

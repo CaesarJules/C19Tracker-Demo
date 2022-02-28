@@ -22,7 +22,7 @@ from functions import *
 #Get the current file's directory
 path = os.path.dirname(__file__)
 #Create logo filepath
-logo = os.path.join(path, '../data/logo.png')
+logo = os.path.join(path, '../data/plots/logo.png')
 
 st.set_page_config(page_title='COVID-19 Dashboard', page_icon = logo, layout = 'wide', initial_sidebar_state = 'auto')
 
@@ -101,10 +101,9 @@ def load_cache(host):
             print("Cache successfully loaded from MySQL DB")
 
 cache_ID, cached_data, latest_cache_date = load_cache(host="c19dbcache.mysql.database.azure.com")
+
 with st.spinner('Fetching results ....'):
     data = dict(cache_data(cached_data, latest_cache_date, regions, df_regions, cache_ID))
-    
-with st.spinner('Fetching results ....'):
     #Create and populate the sidebar
     latest_ww = get_latest_worldwide_data()
     latest_update = datetime.datetime.strptime(latest_ww['last_update'], 
