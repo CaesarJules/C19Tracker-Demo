@@ -25,16 +25,6 @@ filepath = os.path.join(path, '../data/cache_final.p')
 #Create Database SSL certificate filepath
 certpath = os.path.join(path, '../cert/DigiCertGlobalRootCA.crt.pem')
 
-def connect_to_db(host):
-  conn = mysql.connector.connect(user="jniyon", 
-                            password="Hawking18wong$", 
-                            host=host, 
-                            port=3306, 
-                            database="c19db", 
-                            ssl_ca=certpath,
-                            ssl_disabled=False)
-  return conn
-
 def get_dates_till_today(start_date):
   time1 = datetime.datetime.strptime(datetime.datetime.now(timezone('Canada/Eastern')).strftime('%Y-%m-%d'), '%Y-%m-%d')
   return pd.date_range(end=time1, start=start_date).strftime('%Y-%m-%d').tolist()
