@@ -38,7 +38,7 @@ st.title("COVID19 Statistics")
 expander_bar = st.expander("About")
 expander_bar.markdown("""
 #### This is a COVID-19 statistics Dashboard Based on public data by Johns Hopkins CSSE.
-* **EDA and App Development Details:** [Github](https://github.com/CaesarJules/Streamlit-Apps/tree/main/C19Tracker).
+* **EDA and App Development Details:** [Github](https://github.com/CaesarJules/C19Tracker-Demo).
 * **API Credits:** [COVID-19 Statistics](https://rapidapi.com/axisbits-axisbits-default/api/covid-19-statistics/details).
 * **Python libraries used:** streamlit, pandas, numpy, requests, plotly, time, os, matplotlib, collections, datetime, IPython.
 """)
@@ -51,7 +51,6 @@ def get_regions_list():
     url = "https://covid-19-statistics.p.rapidapi.com"
     headers = {
         'x-rapidapi-host': 'covid-19-statistics.p.rapidapi.com',
-        'x-rapidapi-key': '96a36f8da6msh9ee894aabc7ae5bp196263jsn8dfae3d97a64'
     }
     #Get countries names and iso
     response = requests.request(method="GET", url=f"{url}/regions", headers=headers)
