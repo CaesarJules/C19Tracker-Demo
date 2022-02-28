@@ -16,13 +16,14 @@ from IPython.display import Markdown as md
 from pytz import timezone
 from copy import deepcopy
 import mysql.connector
+from streamlit.script_runner import RerunException, StopException
 
 #Get the current file's directory
 path = os.path.dirname(__file__)
 #Create cache's filepath
-filepath = os.path.join(path, 'data/cache_final.p')
+filepath = os.path.join(path, '../data/cache_final.p')
 #Create Database SSL certificate filepath
-certpath = os.path.join(path, 'cert/DigiCertGlobalRootCA.crt.pem')
+certpath = os.path.join(path, '../cert/DigiCertGlobalRootCA.crt.pem')
 
 def connect_to_db(host):
   conn = mysql.connector.connect(user="jniyon", 
@@ -165,6 +166,7 @@ def update_data_ondb(data, latest_date, cache_ID):
     cursor.execute(update_cache_query, (cache_binary, latest_date, cache_ID))
     connection.commit()
     print("Successfully cached data!")
+    raise RerunException(st.script_request_queue.RerunData(None))
 
   except mysql.connector.Error as error:
     print("Failed inserting cache into MySQL table {}".format(error))
@@ -178,7 +180,7 @@ def update_data_ondb(data, latest_date, cache_ID):
 def cache_data(data, latest_date, regions, df_regions, cacheID):
   curr_time =datetime.datetime.now(timezone('Canada/Eastern'))
   time1 = datetime.datetime.strptime(curr_time.strftime('%Y-%m-%d'), '%Y-%m-%d')
-  right_time = datetime.time(5,00) <= curr_time.time() <= datetime.time(6,00)
+  right_time = datetime.time(9,00) <= curr_time.time() <= datetime.time(10,30)
   if time1.date() > (latest_date + datetime.timedelta(days=1)) and right_time:
     new_dates = get_dates_till_today(latest_date)
     #Remove today's date from the dates to be cached
